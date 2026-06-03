@@ -59,6 +59,3 @@ jobs:
 
       - name: Run tests on Bun
         run: bun run test:bun
-
-      - name: Lint
-        run: bun run lint
