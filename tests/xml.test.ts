@@ -1,58 +1,67 @@
-import { test, expect } from "bun:test";
+import assert from "node:assert/strict";
+import { test } from "node:test";
 
-import xml from "nanoxml";
-import { element as xmlElement } from "nanoxml";
+import { xml, element as xmlElement } from "nanoxml";
 
 test("no elements", () => {
-  expect(xml()).toBe("");
-  expect(xml([])).toBe("");
-  expect(xml("test")).toBe("test");
-  expect(xml("scotch & whisky")).toBe("scotch &amp; whisky");
-  expect(xml("bob's escape character")).toBe("bob&apos;s escape character");
+  assert.strictEqual(xml(), "");
+  assert.strictEqual(xml([]), "");
+  assert.strictEqual(xml("test"), "test");
+  assert.strictEqual(xml("scotch & whisky"), "scotch &amp; whisky");
+  assert.strictEqual(
+    xml("bob's escape character"),
+    "bob&apos;s escape character",
+  );
 });
 
 test("simple options", () => {
-  expect(xml([{ a: {} }])).toBe("<a/>");
-  expect(xml([{ a: null }])).toBe("<a/>");
-  expect(xml([{ a: [] }])).toBe("<a></a>");
-  expect(xml([{ a: -1 }])).toBe("<a>-1</a>");
-  expect(xml([{ a: false }])).toBe("<a>false</a>");
-  expect(xml([{ a: "test" }])).toBe("<a>test</a>");
-  expect(xml({ a: {} })).toBe("<a/>");
-  expect(xml({ a: null })).toBe("<a/>");
-  expect(xml({ a: [] })).toBe("<a></a>");
-  expect(xml({ a: -1 })).toBe("<a>-1</a>");
-  expect(xml({ a: false })).toBe("<a>false</a>");
-  expect(xml({ a: "test" })).toBe("<a>test</a>");
-  expect(xml([{ a: "test" }, { b: 123 }, { c: -0.5 }])).toBe(
+  assert.strictEqual(xml([{ a: {} }]), "<a/>");
+  assert.strictEqual(xml([{ a: null }]), "<a/>");
+  assert.strictEqual(xml([{ a: [] }]), "<a></a>");
+  assert.strictEqual(xml([{ a: -1 }]), "<a>-1</a>");
+  assert.strictEqual(xml([{ a: false }]), "<a>false</a>");
+  assert.strictEqual(xml([{ a: "test" }]), "<a>test</a>");
+  assert.strictEqual(xml({ a: {} }), "<a/>");
+  assert.strictEqual(xml({ a: null }), "<a/>");
+  assert.strictEqual(xml({ a: [] }), "<a></a>");
+  assert.strictEqual(xml({ a: -1 }), "<a>-1</a>");
+  assert.strictEqual(xml({ a: false }), "<a>false</a>");
+  assert.strictEqual(xml({ a: "test" }), "<a>test</a>");
+  assert.strictEqual(
+    xml([{ a: "test" }, { b: 123 }, { c: -0.5 }]),
     "<a>test</a><b>123</b><c>-0.5</c>",
   );
 });
 
 test("deeply nested objects", () => {
-  expect(xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }])).toBe(
+  assert.strictEqual(
+    xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }]),
     "<a><b><c>1</c><c>2</c><c>3</c></b></a>",
   );
 });
 
 test("indents property", () => {
-  expect(xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }], true)).toBe(
+  assert.strictEqual(
+    xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }], true),
     "<a>\n    <b>\n        <c>1</c>\n        <c>2</c>\n        <c>3</c>\n    </b>\n</a>",
   );
-  expect(xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }], "  ")).toBe(
+  assert.strictEqual(
+    xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }], "  "),
     "<a>\n  <b>\n    <c>1</c>\n    <c>2</c>\n    <c>3</c>\n  </b>\n</a>",
   );
-  expect(xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }], "\t")).toBe(
+  assert.strictEqual(
+    xml([{ a: [{ b: [{ c: 1 }, { c: 2 }, { c: 3 }] }] }], "\t"),
     "<a>\n\t<b>\n\t\t<c>1</c>\n\t\t<c>2</c>\n\t\t<c>3</c>\n\t</b>\n</a>",
   );
-  expect(xml({ guid: [{ _attr: { premalink: true } }, "content"] }, true)).toBe(
+  assert.strictEqual(
+    xml({ guid: [{ _attr: { premalink: true } }, "content"] }, true),
     '<guid premalink="true">content</guid>',
   );
 });
 
 test("supports xml attributes", () => {
-  expect(xml([{ b: { _attr: {} } }])).toBe("<b/>");
-  expect(
+  assert.strictEqual(xml([{ b: { _attr: {} } }]), "<b/>");
+  assert.strictEqual(
     xml([
       {
         a: {
@@ -63,8 +72,9 @@ test("supports xml attributes", () => {
         },
       },
     ]),
-  ).toBe('<a attribute1="some value" attribute2="12345"/>');
-  expect(
+    '<a attribute1="some value" attribute2="12345"/>',
+  );
+  assert.strictEqual(
     xml([
       {
         a: [
@@ -77,8 +87,9 @@ test("supports xml attributes", () => {
         ],
       },
     ]),
-  ).toBe('<a attribute1="some value" attribute2="12345"></a>');
-  expect(
+    '<a attribute1="some value" attribute2="12345"></a>',
+  );
+  assert.strictEqual(
     xml([
       {
         a: [
@@ -92,14 +103,16 @@ test("supports xml attributes", () => {
         ],
       },
     ]),
-  ).toBe('<a attribute1="some value" attribute2="12345">content</a>');
+    '<a attribute1="some value" attribute2="12345">content</a>',
+  );
 });
 
 test("supports cdata", () => {
-  expect(xml([{ a: { _cdata: "This is some <strong>CDATA</strong>" } }])).toBe(
+  assert.strictEqual(
+    xml([{ a: { _cdata: "This is some <strong>CDATA</strong>" } }]),
     "<a><![CDATA[This is some <strong>CDATA</strong>]]></a>",
   );
-  expect(
+  assert.strictEqual(
     xml([
       {
         a: {
@@ -108,10 +121,9 @@ test("supports cdata", () => {
         },
       },
     ]),
-  ).toBe(
     '<a attribute1="some value" attribute2="12345"><![CDATA[This is some <strong>CDATA</strong>]]></a>',
   );
-  expect(
+  assert.strictEqual(
     xml([
       {
         a: {
@@ -120,13 +132,12 @@ test("supports cdata", () => {
         },
       },
     ]),
-  ).toBe(
     "<a><![CDATA[This is some <strong>CDATA</strong> with ]]]]><![CDATA[> and then again ]]]]><![CDATA[>]]></a>",
   );
 });
 
 test("supports encoding", () => {
-  expect(
+  assert.strictEqual(
     xml([
       {
         a: [
@@ -140,7 +151,6 @@ test("supports encoding", () => {
         ],
       },
     ]),
-  ).toBe(
     '<a anglebrackets="this is &lt;strong&gt;strong&lt;/strong&gt;" url="http://google.com?s=opower&amp;y=fun">text</a>',
   );
 });
@@ -162,12 +172,12 @@ test("supports stream interface", () => {
   elem.close();
 
   xmlStream.on("data", (stanza) => {
-    expect(stanza).toBe(results.shift());
+    assert.strictEqual(stanza, results.shift());
   });
 
   return new Promise<void>((resolve, reject) => {
     xmlStream.on("close", () => {
-      expect(results).toEqual([]);
+      assert.deepStrictEqual(results, []);
       resolve();
     });
     xmlStream.on("error", reject);
@@ -178,7 +188,7 @@ test("streams end properly", () => {
   const elem = xmlElement({ _attr: { decade: "80s", locale: "US" } });
   const xmlStream = xml({ toys: elem }, { stream: true });
 
-  let gotData: boolean;
+  let gotData = false;
 
   elem.push({ toy: "Transformers" });
   elem.push({ toy: "GI Joe" });
@@ -186,17 +196,17 @@ test("streams end properly", () => {
   elem.close();
 
   xmlStream.on("data", (data) => {
-    expect(data).toBeTruthy();
+    assert.ok(data);
     gotData = true;
   });
 
   xmlStream.on("end", () => {
-    expect(gotData).toBeTruthy();
+    assert.ok(gotData);
   });
 
   return new Promise<void>((resolve, reject) => {
     xmlStream.on("close", () => {
-      expect(gotData).toBeTruthy();
+      assert.ok(gotData);
       resolve();
     });
     xmlStream.on("error", reject);
@@ -204,18 +214,25 @@ test("streams end properly", () => {
 });
 
 test("xml declaration options", () => {
-  expect(xml([{ a: "test" }], { declaration: true })).toBe(
+  assert.strictEqual(
+    xml([{ a: "test" }], { declaration: true }),
     '<?xml version="1.0" encoding="UTF-8"?><a>test</a>',
   );
-  expect(xml([{ a: "test" }], { declaration: { encoding: "foo" } })).toBe(
+  assert.strictEqual(
+    xml([{ a: "test" }], { declaration: { encoding: "foo" } }),
     '<?xml version="1.0" encoding="foo"?><a>test</a>',
   );
-  expect(xml([{ a: "test" }], { declaration: { standalone: "yes" } })).toBe(
+  assert.strictEqual(
+    xml([{ a: "test" }], { declaration: { standalone: "yes" } }),
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><a>test</a>',
   );
-  expect(xml([{ a: "test" }], { declaration: false })).toBe("<a>test</a>");
-  expect(xml([{ a: "test" }], { declaration: true, indent: "\n" })).toBe(
+  assert.strictEqual(
+    xml([{ a: "test" }], { declaration: false }),
+    "<a>test</a>",
+  );
+  assert.strictEqual(
+    xml([{ a: "test" }], { declaration: true, indent: "\n" }),
     '<?xml version="1.0" encoding="UTF-8"?>\n<a>test</a>',
   );
-  expect(xml([{ a: "test" }], {})).toBe("<a>test</a>");
+  assert.strictEqual(xml([{ a: "test" }], {}), "<a>test</a>");
 });
